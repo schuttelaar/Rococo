@@ -115,9 +115,55 @@ but when there is nothing left to take away.
 
 <p>Rococo thinks in components. You write a Rococo application by defining (or reusing) components. A component manages an HTML snippet. For instance consider the following button:</p>
 
-<p><code>&lt;button class="awake" data-awake="RButton" &gt;SAVE DOCUMENT&lt;/button&gt;</code></p>
+<p><code>&lt;button class="awake" data-post="/store" data-awake="ActionButton" &gt;SAVE DOCUMENT&lt;/button&gt;</code></p>
 
 <p>Here we have the HTML for a save button. We would like to have a general button that performs a server call and updates the label afterwards. This is our 'generic' component. We can define this component like this:</p>
+
+<pre><code> UI.components.ActionButton = {
+        createNew: function() {
+               var obj = {};
+               obj.init = function() {
+                     $(this).on('click', function(e){
+                          e.preventDefault();
+                          var url = obj.$node.attr('data-post');
+                          var data = $.serialize(obj.$node.parents('form'));
+                          $.post(url, data, function(){
+                               obj.$node.html('SAVED!');
+                          });
+                     });
+               }
+               return obj;
+        }
+ }
+</code></pre>
+
+<p>While this button will work just fine, it would be nice if we could change the default behaviour of the button after posting the data. This would allow us to use this buttons in projects that require slightly different ActionButton behaviour. To do so, we add a delegate like this:</p>
+
+<p><code>&lt;button class="awake" data-post="/store" data-awake="ActionButton" data-delegate="controller" &gt;SAVE DOCUMENT&lt;/button&gt;</code></p>
+
+<p>And we define our delegate:</p>
+
+<pre><code> UI.classes.Controller = {
+        createNew: function() {
+               var obj = {};
+               obj.serverDidRespond = function(resp) {
+                    obj.component.$node.html( JSON.parse(resp).message );
+               }
+               return obj;
+        }
+ }
+
+ UI.instances.controller = UI.classes.Controller.createNew();
+</code></pre>
+
+<p>And we change the component to:</p>
+
+<pre><code>  $.post(url, data, function(){
+       obj.delegate.serverDidRespond();
+  });
+</code></pre>
+
+<p>Now we can specify any behaviour for our ActionButton! But even better the connection between the component and delegate has been specified in the HTML, the classes are loosely coupled and easy to test.</p>
         </section>
 
         <footer>
