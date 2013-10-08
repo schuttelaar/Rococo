@@ -137,6 +137,9 @@ but when there is nothing left to take away.
  }
 </code></pre>
 
+<h3>
+<a name="delegates" class="anchor" href="#delegates"><span class="octicon octicon-link"></span></a>Delegates</h3>
+
 <p>While this button will work just fine, it would be nice if we could change the default behaviour of the button after posting the data. This would allow us to use this buttons in projects that require slightly different ActionButton behaviour. To do so, we add a delegate like this:</p>
 
 <p><code>&lt;button class="awake" data-post="/store" data-awake="ActionButton" data-delegate="controller" &gt;SAVE DOCUMENT&lt;/button&gt;</code></p>
@@ -147,7 +150,7 @@ but when there is nothing left to take away.
         createNew: function() {
                var obj = {};
                obj.serverDidRespond = function(resp) {
-                    obj.component.$node.html( JSON.parse(resp).message );
+                    return JSON.parse(resp).message;
                }
                return obj;
         }
@@ -159,11 +162,26 @@ but when there is nothing left to take away.
 <p>And we change the component to:</p>
 
 <pre><code>  $.post(url, data, function(){
-       obj.delegate.serverDidRespond();
+       obj.$node.html( obj.delegate.serverDidRespond() );
   });
 </code></pre>
 
 <p>Now we can specify any behaviour for our ActionButton! But even better the connection between the component and delegate has been specified in the HTML, the classes are loosely coupled and easy to test.</p>
+
+<h3>
+<a name="connecting-nodes" class="anchor" href="#connecting-nodes"><span class="octicon octicon-link"></span></a>Connecting nodes</h3>
+
+<p>Most of the time, a component consists of a single DOM node containing several child nodes. Together these nodes form the component DOM available in your component object property obj.$node.</p>
+
+<p>Sometimes however you may have several DOM nodes forming a component together. For instance if you have a sortable table component and a list of filters in the sidebar, or a video component with a separate remote control formed by a set of additional DOM nodes. Rococo allows you to easily connect these nodes.</p>
+
+<pre><code>&lt;div class="awakable" id="cinema" data-awake="VideoPlayer"&gt;&lt;/div&gt;
+&lt;div class="connected" data-belongsto="cinema"&gt;&lt;a&gt;PLAY&lt;/a&gt;&lt;/div&gt;
+</code></pre>
+
+<p>In this example we connect a player control to its component. Note that we use a class 'connected' to mark the DOM node as being connected to another DOM node. Then, we specify the owning DOM node by its ID in the data-belongsto property.</p>
+
+<p>Both DOM nodes will now be available in obj.$nodes</p>
         </section>
 
         <footer>
