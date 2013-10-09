@@ -4,7 +4,7 @@ UI = {
 	awake:function($n, onlySelected, cycles){
 		var awakeComponents = function($awakables) {
 			$awakables.each(function(){
-				var comp = $(this).attr('data-awake');
+				var comp = this.getAttribute('data-awake');
 				if (!comp) throw('Invalid component ID');
 				var parts = comp.split('.');
 				var compRef = UI.components
@@ -17,21 +17,21 @@ UI = {
 				var c = compRef.createNew();
 				if (!c) throw('Invalid createNew() function on '+comp+', should return object! ');
 				c.$node = $(this);
-				c.$nodes = $(this).add( $(".connected[data-belongsto=\""+$(this).attr("id")+"\"]") );
+				c.$nodes = $(this).add( $(".connected[data-belongsto=\""+this.id+"\"]") );
 				var compID = 'CMPID'+(++UI.CMPID);
-				if ($(this).attr('id')) {
-					compID = $(this).attr('id');
+				if (this.id) {
+					compID = this.id;
 				}
-				$(this).attr('data-oid',compID);
+				this.setAttribute('data-oid', compID);
 				c.CMPID = compID;
 				UI.instances[compID] = c;
 				if (!UI.instancesByComp[comp]) UI.instancesByComp[comp] = {};
 				UI.instancesByComp[comp][compID] = c;
-				c.factory = UI.classes[$(this).attr('data-factory')];
+				c.factory = UI.classes[this.getAttribute('data-factory')];
 				if (c.factory) {
 					c.delegate = c.factory.createNew();
 				} else {
-					c.delegate = UI.instances[$(this).attr('data-delegate')];
+					c.delegate = UI.instances[this.getAttribute('data-delegate')];
 				}
 				if (c.delegate) {
 					c.delegate.component = c;
