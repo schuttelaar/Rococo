@@ -125,12 +125,12 @@ but when there is nothing left to take away.
         createNew: function() {
                var obj = {};
                obj.init = function() {
-                     obj.$node.on('click', function(e){
+                     obj.onclick = function(e){
                           e.preventDefault();
-                          var url = obj.$node.attr('data-post');
-                          var data = $.serialize(obj.$node.parents('form'));
-                          $.post(url, data, function(){
-                               obj.$node.html('SAVED!');
+                          var url = obj.node.getAttribute('data-post');
+                          var data = serializeForm();
+                          myAjaxPostFunction(url, data, function(){
+                               obj.node.innerHTML = 'SAVED!';
                           });
                      });
                }
@@ -164,8 +164,8 @@ but when there is nothing left to take away.
 
 <p>And we change the component to:</p>
 
-<pre><code>  $.post(url, data, function(){
-       obj.$node.html( obj.delegate.serverDidRespond() );
+<pre><code>  myAjaxPostFunction(url, data, function(){
+       obj.node.innerHTML = obj.delegate.serverDidRespond();
   });
 </code></pre>
 
