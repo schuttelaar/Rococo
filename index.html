@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Rococo by schuttelaar</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Rococo</h1>
+          <h2>Javascript Microframework</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/schuttelaar/Rococo/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/schuttelaar/Rococo/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/schuttelaar/Rococo" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h3>
+<a name="welcome" class="anchor" href="#welcome"><span class="octicon octicon-link"></span></a>Welcome</h3>
+
+<p>Rococo is a Micro Framework to create elegant and robust Javascript Applications.</p>
+
+<pre><code>Perfection is achieved, 
+not when there is nothing more to add, 
+but when there is nothing left to take away.
+    -- Antoine de Saint-Exupery
+</code></pre>
+
+<p>Rococo works with a strict subset of Javascript (informally we call this BlackScript). BlackScript is like Javascript but has no:</p>
+
+<ul>
+<li>new keyword</li>
+<li>prototypes</li>
+<li>this keyword</li>
+<li>native constructors</li>
+<li><strong>proto</strong></li>
+<li>object.create</li>
+<li>labels</li>
+<li>with keyword</li>
+</ul><p>We choose to work with BlackScript instead of Javascript because:</p>
+
+<ul>
+<li>we prefer a small, clean language without half-baked features</li>
+<li>a language that works in all browsers even the oldest ones (unlike object.create or <strong>proto</strong>)</li>
+</ul><h3>
+<a name="object-oriented-programming-in-blackscript" class="anchor" href="#object-oriented-programming-in-blackscript"><span class="octicon octicon-link"></span></a>Object Oriented Programming in BlackScript</h3>
+
+<p>To understand Rococo, you need to understand BlackScript first. Object oriented programming in BlackScript is really simple. We only use literals.</p>
+
+<p>A class is a literal object that produces other objects and is defined in a class namespace like this:</p>
+
+<pre><code> UI.classes.Machine {
+       createNew: function(bundle) {
+             var protect = bundle || {};
+             //protected property
+             protect.coin = false;
+             var obj = {};
+             obj.insertCoin = function(coin) {
+                  protect.coin = true;
+             }
+             return obj;
+       }
+ }
+
+ UI.classes.CoffeeMachine = {
+       createNew: function(bundle) {
+             var protect = bundle || {};
+             //inherit from machine
+             var obj = UI.classes.Machine.createNew(protect); 
+             obj.makeCoffee = function() {
+                  if (!protect.coin) return 'insert coin!';
+                  protect.coin = false;
+                  return 'espresso';
+             }
+             return obj;
+       }
+ }
+</code></pre>
+
+<p>You can use this class like this:</p>
+
+<pre><code> var c = UI.classes.CoffeeMachine.createNew();
+ c.insertCoin(1);
+ c.makeCoffee(); //returns 'espresso'
+</code></pre>
+
+<h3>
+<a name="using-rococo" class="anchor" href="#using-rococo"><span class="octicon octicon-link"></span></a>Using Rococo</h3>
+
+<p>Rococo helps you to structure your BlackScript application. A Rococo application consists of three parts: HTML, components and delegates or helpers.</p>
+
+<ul>
+<li>HTML is where you store the markup </li>
+<li>Components is where you store reusable code</li>
+<li>Delegates and helpers are where you store custom behaviour</li>
+</ul><p>Rococo separates these three and re-connects them to form an application.</p>
+
+<h3>
+<a name="your-first-component" class="anchor" href="#your-first-component"><span class="octicon octicon-link"></span></a>Your first component</h3>
+
+<p>Rococo thinks in components. You write a Rococo application by defining (or reusing) components. A component manages an HTML snippet. For instance consider the following button:</p>
+
+<pre><code> &lt;button class="awake" data-post="/store" data-awake="ActionButton" &gt;SAVE DOCUMENT&lt;/button&gt;
+</code></pre>
+
+<p>Here we have the HTML for a save button. We would like to have a general button that performs a server call and updates the label afterwards. This is our 'generic' component. We can define this component like this:</p>
+
+<pre><code> UI.components.ActionButton = {
+        createNew: function() {
+               var obj = {};
+               obj.init = function() {
+                     $(this).on('click', function(e){
+                          e.preventDefault();
+                          var url = obj.$node.attr('data-post');
+                          var data = $.serialize(obj.$node.parents('form'));
+                          $.post(url, data, function(){
+                               obj.$node.html('SAVED!');
+                          });
+                     });
+               }
+               return obj;
+        }
+ }
+</code></pre>
+
+<h3>
+<a name="delegates" class="anchor" href="#delegates"><span class="octicon octicon-link"></span></a>Delegates</h3>
+
+<p>While this button will work just fine, it would be nice if we could change the default behaviour of the button after posting the data. This would allow us to use this buttons in projects that require slightly different ActionButton behaviour. To do so, we add a delegate like this:</p>
+
+<p><code>&lt;button class="awake" data-post="/store" data-awake="ActionButton" data-delegate="controller" &gt;SAVE DOCUMENT&lt;/button&gt;</code></p>
+
+<p>And we define our delegate:</p>
+
+<pre><code> UI.classes.Controller = {
+        createNew: function() {
+               var obj = {};
+               obj.serverDidRespond = function(resp) {
+                    return JSON.parse(resp).message;
+               }
+               return obj;
+        }
+ }
+
+ UI.instances.controller = UI.classes.Controller.createNew();
+</code></pre>
+
+<p>And we change the component to:</p>
+
+<pre><code>  $.post(url, data, function(){
+       obj.$node.html( obj.delegate.serverDidRespond() );
+  });
+</code></pre>
+
+<p>Now we can specify any behaviour for our ActionButton! But even better the connection between the component and delegate has been specified in the HTML, the classes are loosely coupled and easy to test.</p>
+
+<h3>
+<a name="connecting-nodes" class="anchor" href="#connecting-nodes"><span class="octicon octicon-link"></span></a>Connecting nodes</h3>
+
+<p>Most of the time, a component consists of a single DOM node containing several child nodes. Together these nodes form the component DOM available in your component object property obj.$node.</p>
+
+<p>Sometimes however you may have several DOM nodes forming a component together. For instance if you have a sortable table component and a list of filters in the sidebar, or a video component with a separate remote control formed by a set of additional DOM nodes. Rococo allows you to easily connect these nodes.</p>
+
+<pre><code>&lt;div class="awakable" id="cinema" data-awake="VideoPlayer"&gt;&lt;/div&gt;
+&lt;div class="connected" data-belongsto="cinema"&gt;&lt;a&gt;PLAY&lt;/a&gt;&lt;/div&gt;
+</code></pre>
+
+<p>In this example we connect a player control to its component. Note that we use a class 'connected' to mark the DOM node as being connected to another DOM node. Then, we specify the owning DOM node by its ID in the data-belongsto property.</p>
+
+<p>Both DOM nodes will now be available in obj.$nodes</p>
+
+<h3>
+<a name="factories" class="anchor" href="#factories"><span class="octicon octicon-link"></span></a>Factories</h3>
+
+<p>Instead of using a delegate object you can also specify a delegate class. Using the</p>
+
+<pre><code> data-factory="MyDelegateClass"
+</code></pre>
+
+<p>You can specify which delegate class should be used to create the delegate instance. Rococo will now function as a factory and create an instance of MyDelegateClass and connect this delegate object to your component instance.</p>
+        </section>
+
+        <footer>
+          Rococo is maintained by <a href="https://github.com/schuttelaar">schuttelaar</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
