@@ -49,7 +49,7 @@ but when there is nothing left to take away.
 <li>prototypes</li>
 <li>this keyword</li>
 <li>native constructors</li>
-<li><strong>proto</strong></li>
+<li>__proto__</li>
 <li>object.create</li>
 <li>labels</li>
 <li>with keyword</li>
@@ -125,7 +125,7 @@ but when there is nothing left to take away.
         createNew: function() {
                var obj = {};
                obj.init = function() {
-                     $(this).on('click', function(e){
+                     obj.$node.on('click', function(e){
                           e.preventDefault();
                           var url = obj.$node.attr('data-post');
                           var data = $.serialize(obj.$node.parents('form'));
@@ -144,7 +144,8 @@ but when there is nothing left to take away.
 
 <p>While this button will work just fine, it would be nice if we could change the default behaviour of the button after posting the data. This would allow us to use this buttons in projects that require slightly different ActionButton behaviour. To do so, we add a delegate like this:</p>
 
-<p><code>&lt;button class="awake" data-post="/store" data-awake="ActionButton" data-delegate="controller" &gt;SAVE DOCUMENT&lt;/button&gt;</code></p>
+<pre><code>&lt;button class="awake" data-post="/store" data-awake="ActionButton" data-delegate="controller" &gt;SAVE DOCUMENT&lt;/button&gt;</code>
+</pre>
 
 <p>And we define our delegate:</p>
 
